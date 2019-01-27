@@ -24,11 +24,16 @@ func main() {
 		return
 	}
 
+	// Generate front page once and then start ticker to generate every n minutes
 	generateFront()
 	go runLoop()
 
+	// Handle and serve front page
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, globalPage)
+		_, err := fmt.Fprintf(w, globalPage)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	})
 	log.Fatal(http.ListenAndServe(":9691", nil))
 }
@@ -45,8 +50,15 @@ func runLoop() {
 
 func generateFront() {
 	fmt.Println("Generate and publish new front page")
-	uname, url, _ := callUnsplash(APIKey)
-	parseFrontToGlobal(uname, url)
+	resp, err := callUnsplash(APIKey)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	err = parseFrontToGlobal(resp.Username, resp.PhotoURLRegular)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 }
 
 func parseFrontToGlobal(username, imageurl string) error {
@@ -75,7 +87,12 @@ func parseFrontToGlobal(username, imageurl string) error {
 	return nil
 }
 
-func callUnsplash(api_key string) (string, string, error) {
+type apiResponse struct {
+	Username        string
+	PhotoURLRegular string
+}
+
+func callUnsplash(api_key string) (apiResponse, error) {
 	// Prepare call to API
 	uapi, _ := url.Parse("https://api.unsplash.com/photos/random?orientation=landscape")
 	authHeader := http.Header{}
@@ -92,9 +109,10 @@ func callUnsplash(api_key string) (string, string, error) {
 	}
 	resp, err := c.Do(&req)
 	if err != nil {
-		return "", "", err
+		return apiResponse{}, err
 	}
 
+	// Prepare to pick what's needed from returned JSON
 	type randomPhoto struct {
 		RNDPhotoURLs struct {
 			Regular string `json:"regular"`
@@ -105,8 +123,7 @@ func callUnsplash(api_key string) (string, string, error) {
 	}
 
 	rp := randomPhoto{}
-
 	ubody, _ := ioutil.ReadAll(resp.Body)
 	err = json.Unmarshal(ubody, &rp)
-	return rp.User.Username, rp.RNDPhotoURLs.Regular, err
+	return apiResponse{rp.User.Username, rp.RNDPhotoURLs.Regular}, err
 }

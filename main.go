@@ -17,9 +17,9 @@ import (
 var globalPage string
 
 func main() {
-	API_KEY := os.Getenv("STARTPAGE_API_KEY")
+	APIKey := os.Getenv("STARTPAGE_API_KEY")
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		uname, url, _ := callUnsplash(API_KEY)
+		uname, url, _ := callUnsplash(APIKey)
 		parseFrontToGlobal(uname, url)
 		fmt.Fprintf(w, globalPage)
 	})

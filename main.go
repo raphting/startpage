@@ -62,7 +62,8 @@ func generateFront() {
 }
 
 func parseFrontToGlobal(username, imageurl string) error {
-	tpl, err := template.ParseFiles("./front.html")
+	tpl := template.New("front")
+	tpl, err := tpl.Parse(getFrontTemplate())
 	if err != nil {
 		return err
 	}

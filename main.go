@@ -14,21 +14,24 @@ import (
 	"time"
 )
 
+var globalPage string
+
 func main() {
 	API_KEY := os.Getenv("STARTPAGE_API_KEY")
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		uname, url, _ := callUnsplash(API_KEY)
-		front, _ := parseFront(uname, url)
-		fmt.Fprintf(w, front)
+		parseFrontToGlobal(uname, url)
+		fmt.Fprintf(w, globalPage)
 	})
 	log.Fatal(http.ListenAndServe(":9691", nil))
 }
 
-func parseFront(username, imageurl string) (string, error) {
+func parseFrontToGlobal(username, imageurl string) error {
 	tpl, err := template.ParseFiles("./front.html")
 	if err != nil {
-		return "", err
+		return err
 	}
+
 	var b bytes.Buffer
 	foo := bufio.NewWriter(&b)
 
@@ -39,14 +42,14 @@ func parseFront(username, imageurl string) (string, error) {
 
 	err = tpl.Execute(foo, front{username, imageurl})
 	if err != nil {
-		return "", err
+		return err
 	}
 	err = foo.Flush()
 	if err != nil {
-		return "", err
+		return err
 	}
-
-	return b.String(), err
+	globalPage = b.String()
+	return nil
 }
 
 func callUnsplash(api_key string) (string, string, error) {

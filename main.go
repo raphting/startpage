@@ -18,6 +18,11 @@ var globalPage string
 
 func main() {
 	APIKey := os.Getenv("STARTPAGE_API_KEY")
+	if APIKey == "" {
+		fmt.Println("The environment variable STARTPAGE_API_KEY (Unsplash API access key) is required.")
+		return
+	}
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		uname, url, _ := callUnsplash(APIKey)
 		parseFrontToGlobal(uname, url)

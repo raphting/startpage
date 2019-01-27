@@ -2,9 +2,10 @@ package main
 
 func getFrontTemplate() string {
 	// Helper function to compile the template into the binary
-	return `<html lang="en">
+	return `<!DOCTYPE html><html lang="en">
 <head>
-<title>Start</title>
+<meta charset="utf-8" />
+<title></title>
 <style>
 html {
 background: url({{.ImageURL}}) no-repeat center center fixed;

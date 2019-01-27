@@ -5,7 +5,7 @@ func getFrontTemplate() string {
 	return `<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="utf-8" />
-<title></title>
+<title>start</title>
 <style>
 html {
 background: url({{.ImageURL}}) no-repeat center center fixed;

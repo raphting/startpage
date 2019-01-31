@@ -55,13 +55,13 @@ func generateFront() {
 		fmt.Println(err.Error())
 		return
 	}
-	err = parseFrontToGlobal(resp.Username, resp.PhotoURLRegular)
+	err = parseFrontToGlobal(resp.Name, resp.Username, resp.PhotoURLRegular)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 }
 
-func parseFrontToGlobal(username, imageurl string) error {
+func parseFrontToGlobal(name, username, imageurl string) error {
 	tpl := template.New("front")
 	tpl, err := tpl.Parse(getFrontTemplate())
 	if err != nil {
@@ -72,11 +72,12 @@ func parseFrontToGlobal(username, imageurl string) error {
 	foo := bufio.NewWriter(&b)
 
 	type front struct {
+		Name     string
 		Username string
 		ImageURL string
 	}
 
-	err = tpl.Execute(foo, front{username, imageurl})
+	err = tpl.Execute(foo, front{name, username, imageurl})
 	if err != nil {
 		return err
 	}
@@ -89,6 +90,7 @@ func parseFrontToGlobal(username, imageurl string) error {
 }
 
 type apiResponse struct {
+	Name            string
 	Username        string
 	PhotoURLRegular string
 }
@@ -119,6 +121,7 @@ func callUnsplash(api_key string) (apiResponse, error) {
 			Regular string `json:"regular"`
 		} `json:"urls"`
 		User struct {
+			Name     string `json:"name"`
 			Username string `json:"username"`
 		}
 	}
@@ -126,5 +129,14 @@ func callUnsplash(api_key string) (apiResponse, error) {
 	rp := randomPhoto{}
 	ubody, _ := ioutil.ReadAll(resp.Body)
 	err = json.Unmarshal(ubody, &rp)
-	return apiResponse{rp.User.Username, rp.RNDPhotoURLs.Regular}, err
+
+	maxNameLen := 30
+	if len(rp.User.Name) > maxNameLen {
+		rp.User.Name = rp.User.Name[0:maxNameLen]
+		rp.User.Name += "..."
+	}
+
+	return apiResponse{rp.User.Name,
+		rp.User.Username,
+		rp.RNDPhotoURLs.Regular}, err
 }

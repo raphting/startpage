@@ -34,7 +34,7 @@ a:hover {color: #ffffff; text-decoration: none; }
 </style>
 </head>
 <body>
-<p id="reference">Photo by <a href="https://unsplash.com/@{{.Username}}">{{.Username}}</a>  on <a href="https://unsplash.com">Unsplash</a></p>
+<p id="reference">Photo by <a href="https://unsplash.com/@{{.Username}}">{{.Name}}</a>  on <a href="https://unsplash.com">Unsplash</a></p>
 </body>
 </html>`
 }
